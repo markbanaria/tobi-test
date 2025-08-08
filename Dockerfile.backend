@@ -31,7 +31,7 @@ RUN pip install --no-cache-dir --timeout 100 --retries 5 -r requirements.txt
 RUN adduser --disabled-password --gecos '' appuser
 
 # Copy backend project files
-COPY . .
+COPY backend/ .
 
 # Change ownership
 RUN chown -R appuser /app

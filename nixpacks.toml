@@ -1,3 +1,3 @@
 # Disable Nixpacks - use Docker instead
 [build]
-dockerfile = "backend/Dockerfile"
+dockerfile = "Dockerfile.backend"
