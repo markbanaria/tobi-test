@@ -3115,6 +3115,21 @@ Important: Use the tools to help you provide the best possible assistance to the
 
         # Add the current user query as a human message
         messages.append(HumanMessage(content=query_text))
+        
+        # CRITICAL FIX: Immediately save the user message to ensure it's persisted
+        # This guarantees that user input is stored even if the agent processing fails
+        try:
+            await self.memory_manager.store_message(
+                conversation_id=conversation_id,
+                user_id=user_id,
+                message_text=query_text,
+                message_type="human",
+                agent_type="rag"
+            )
+            logger.info(f"✅ [INVOKE] User message saved to database: '{query_text[:50]}...'")
+        except Exception as e:
+            logger.error(f"❌ [INVOKE] Failed to save user message to database: {e}")
+            # Continue processing even if message saving fails
 
         # Initialize state with existing conversation context
         initial_state = AgentState(

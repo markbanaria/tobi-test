@@ -2408,6 +2408,62 @@ class MemoryManager:
             logger.error(f"Error saving message to database: {e}")
             return None
 
+    async def store_message(self, conversation_id: str, user_id: str, 
+                          message_text: str, message_type: str, 
+                          agent_type: str = "rag", metadata: Optional[Dict[str, Any]] = None) -> Optional[str]:
+        """
+        High-level method to store a message to the database.
+        This method is called by the agent to store user and assistant messages.
+        
+        Args:
+            conversation_id: The conversation ID
+            user_id: The user ID 
+            message_text: The message content
+            message_type: The message type/role ('human', 'ai', 'assistant', etc.)
+            agent_type: The agent type (default 'rag')
+            metadata: Optional metadata for the message
+            
+        Returns:
+            Message ID if successful, None otherwise
+        """
+        try:
+            logger.info(f"🔍 [STORE_MESSAGE] Storing {message_type} message for conversation {conversation_id}")
+            logger.debug(f"🔍 [STORE_MESSAGE] Message content: {message_text[:100]}...")
+            
+            # Convert message_type to appropriate role for database (LangChain-compatible schema)
+            role_mapping = {
+                'human': 'human',
+                'user': 'human', 
+                'ai': 'ai',
+                'assistant': 'ai',
+                'bot': 'ai',       # Legacy bot -> ai
+                'system': 'system',
+                'tool': 'tool',
+                'function': 'function'
+            }
+            
+            role = role_mapping.get(message_type.lower(), message_type.lower())
+            
+            # Use the existing save_message_to_database method
+            message_id = await self.save_message_to_database(
+                conversation_id=conversation_id,
+                user_id=user_id,
+                role=role,
+                content=message_text,
+                metadata=metadata
+            )
+            
+            if message_id:
+                logger.info(f"✅ [STORE_MESSAGE] Successfully stored message with ID: {message_id}")
+            else:
+                logger.error(f"❌ [STORE_MESSAGE] Failed to store message - no ID returned")
+                
+            return message_id
+            
+        except Exception as e:
+            logger.error(f"❌ [STORE_MESSAGE] Error storing message: {e}")
+            return None
+
     async def _ensure_conversation_exists(self, conversation_id: str, user_id: str) -> str:
         """
         Ensure conversation record exists in the conversations table.
@@ -2546,27 +2602,32 @@ class MemoryManager:
                 metadata = getattr(message, 'metadata', {}) or {}
 
                 # Map LangChain message types to database-compatible roles
-                # Database constraint: ('user', 'assistant', 'system')
+                # Database constraint (post-migration): ('ai', 'human', 'assistant', 'system', 'user', 'tool', 'function')
                 if hasattr(message, 'type'):
                     role_mapping = {
-                        'human': 'user',      # LangChain 'human' -> DB 'user'
-                        'ai': 'assistant',    # LangChain 'ai' -> DB 'assistant'
-                        'system': 'system',   # LangChain 'system' -> DB 'system'
-                        'assistant': 'assistant'  # LangChain 'assistant' -> DB 'assistant'
+                        'human': 'human',     # LangChain 'human' -> DB 'human' (direct mapping)
+                        'ai': 'ai',           # LangChain 'ai' -> DB 'ai' (direct mapping)
+                        'system': 'system',   # LangChain 'system' -> DB 'system' (direct mapping)
+                        'assistant': 'assistant',  # LangChain 'assistant' -> DB 'assistant' (direct mapping)
+                        'user': 'human',      # LangChain 'user' -> DB 'human' (user is alternative for human)
+                        'tool': 'tool',       # Tool responses
+                        'function': 'function'  # Function responses
                     }
-                    role = role_mapping.get(message.type, 'assistant')    # Default to 'assistant' for unknown types
+                    role = role_mapping.get(message.type, 'ai')    # Default to 'ai' for unknown types
                 elif hasattr(message, 'role'):
                     # Handle direct role assignments and normalize them
                     role = message.role.lower() if isinstance(message.role, str) else str(message.role)
-                    # Map to database-compatible roles
+                    # Map to database-compatible roles (using updated schema)
                     if role in ['human', 'user']:
-                        role = 'user'
+                        role = 'human'  # Standardize to 'human' as primary user role
                     elif role in ['ai', 'assistant']:
-                        role = 'assistant'
+                        role = 'ai'     # Standardize to 'ai' as primary assistant role
                     elif role == 'system':
                         role = 'system'
+                    elif role in ['tool', 'function']:
+                        role = role     # Keep tool/function roles as-is
                     else:
-                        role = 'assistant'  # Default fallback
+                        role = 'ai'     # Default fallback to 'ai'
 
             # Skip empty messages
             if not content.strip():
