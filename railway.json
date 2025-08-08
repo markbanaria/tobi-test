@@ -1,0 +1,27 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "services": [
+    {
+      "name": "backend",
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "backend/Dockerfile"
+      },
+      "variables": {
+        "ENVIRONMENT": "production",
+        "PORT": "8000"
+      }
+    },
+    {
+      "name": "frontend",
+      "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "frontend/Dockerfile"
+      },
+      "variables": {
+        "NODE_ENV": "production",
+        "PORT": "3000"
+      }
+    }
+  ]
+}
