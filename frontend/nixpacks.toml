@@ -1,0 +1,3 @@
+# Force Railway to use Docker for frontend
+[build]
+dockerfile = "Dockerfile"

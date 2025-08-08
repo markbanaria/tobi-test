@@ -20,6 +20,8 @@ This guide will help you deploy your RAG application to Railway.
 3. Select "Deploy from GitHub repo"
 4. Connect your GitHub account and select this repository
 
+**Important**: Railway may try to use Nixpacks instead of Docker. The `nixpacks.toml` files in this repo force Railway to use Docker instead.
+
 ### 2. Deploy Backend Service
 
 1. Railway will automatically detect your project structure
@@ -161,7 +163,13 @@ Copy from `railway.env.example` and set in Railway dashboard:
 
 ### Common Issues
 
-1. **Build Failures**:
+1. **Nixpacks Build Failures**:
+   - If you see "Nixpacks build failed" or "No start command could be found"
+   - Ensure `nixpacks.toml` files are present in root, backend, and frontend directories
+   - These files force Railway to use Docker instead of Nixpacks
+   - Try redeploying after pushing these config files
+
+2. **Build Failures**:
    - Check the build logs in Railway dashboard
    - Ensure Dockerfiles are properly configured
    - Verify all required files are in the repository
