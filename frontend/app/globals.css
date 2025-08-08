@@ -63,8 +63,24 @@ html {
 .delay-500 { animation-delay: 500ms; }
 .delay-1000 { animation-delay: 1000ms; }
 
-/* Import Inter font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Local Inter font faces */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Variable.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Variable-Italic.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Import Fira Code from Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap');
 
 /* Custom base styles */
@@ -130,6 +146,68 @@ html {
       opacity: 1;
     }
   }
+}
+
+/* Markdown styling */
+.prose {
+  color: inherit;
+}
+
+.prose p {
+  margin-bottom: 0.75rem;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.prose h1 { font-size: 1.25rem; }
+.prose h2 { font-size: 1.125rem; }
+.prose h3 { font-size: 1rem; }
+
+.prose ul, .prose ol {
+  margin-left: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose li {
+  margin-bottom: 0.25rem;
+}
+
+.prose blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.prose table {
+  width: 100%;
+  margin-bottom: 0.75rem;
+  border-collapse: collapse;
+}
+
+.prose th, .prose td {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.prose th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+.prose em {
+  font-style: italic;
 }
 
 /* Reset default styles - keep the original reset at the bottom */
